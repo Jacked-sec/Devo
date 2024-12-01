@@ -3,15 +3,15 @@ import hmac
 import hashlib
 import json
 
-api_key = '9kC4KPvx18KtX4VFhhPTTLTZH51rGPdsPUuwbwpwR1Kcg308es'
-api_secret = 'jYk56wv6xIAeTNi2nQTTzRm5z2CVNKp3zyMizxh8lXB04lD8oPyudvVChtnao3xb'
+api_key = 'xxx'
+api_secret = 'xxx'
 timestamp = str(int(time.time()) * 1000)
 
 # Convert the data to a JSON string (Creates a new domain)
-data1 = json.dumps({"name": "Chandler@gable", "plan": "gable_children"})
+data1 = json.dumps({"name": "xxxx@xxxx", "plan": "gable_children"})
 
 # Adds an internal user
-data2 = json.dumps({"domain": "Chandler@gable","userName": "Tanakong Chujai","email": "tanakong.c@g-able.com","role": "Owner"})
+data2 = json.dumps({"domain": "xxxx@xxxx","userName": "xxxx xxxx","email": "xxxx.x@xxxx.com","role": "Owner"})
 
 # Create the signature(Creates a new domain)
 sign1 = hmac.new(bytes(api_secret, 'utf-8'), bytes(api_key + data1 + timestamp, 'utf-8'), hashlib.sha256)
