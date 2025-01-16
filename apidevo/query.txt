@@ -1,0 +1,11 @@
+curl --location 'https://api-apac.devo.com/search/query' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer xxxxxxxxxxxxxxxxxxxxxxxx' \
+--data '{
+ "query": "from siem.logtrust.web.activity",
+ "limit": 1,
+ "from": "1s",
+ "keepAlive": {
+    "type":"empty"                
+  }
+}'
