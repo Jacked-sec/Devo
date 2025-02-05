@@ -1,0 +1,15 @@
+Edit rule definition
+
+Source port
+13003
+Source data
+type=\"{0,1}([^\s^\"]+)\"{0,1}\ssubtype=\"{0,1}([^\s^\"]+)\"{0,1}
+
+Ture Sent without syslog tag
+
+
+Target tag
+firewall.fortinet.\\D1.\\D2.noncsv
+
+
+Ture Stop processing
