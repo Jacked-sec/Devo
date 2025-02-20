@@ -56,8 +56,8 @@ SpoolDir  %ROOT%\data
 </Input>
 <Output devo_relay>
     Module      om_tcp
-    Host        <dst IP>
-    Port        <port>
+    Host        <Relay Ip>
+    Port        13000
     Exec        $Message = to_json(); $SourceName="box.win_nxlog."+lc($Channel); delete($ProcessID); to_syslog_bsd();
 </Output>
 <Route 1>
