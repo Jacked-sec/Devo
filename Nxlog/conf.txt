@@ -1,65 +1,54 @@
-Panic Soft
-#NoFreeOnExit TRUE
-define ROOT     C:\Program Files\nxlog
-define CERTDIR  %ROOT%\cert
-define CONFDIR  %ROOT%\conf\nxlog.d
-define LOGDIR   %ROOT%\data
-include %CONFDIR%\\*.conf
-define LOGFILE  %LOGDIR%\nxlog.log
+#define ROOT C:\Program Files\nxlog
+define ROOT C:\Program Files\nxlog
+define LOGDIR %ROOT%\data
+define LOGFILE %LOGDIR%\nxlog.log
 LogFile %LOGFILE%
 Moduledir %ROOT%\modules
-CacheDir  %ROOT%\data
-Pidfile   %ROOT%\data\nxlog.pid
-SpoolDir  %ROOT%\data
-<Extension _syslog>
-    Module      xm_syslog
-</Extension>
-<Extension _charconv>
-    Module      xm_charconv
-    AutodetectCharsets iso8859-2, utf-8, utf-16, utf-32
-</Extension>
-<Extension _exec>
-    Module      xm_exec
-</Extension>
+CacheDir %ROOT%\data
+Pidfile %ROOT%\data\nxlog.pid
+SpoolDir %ROOT%\data
 <Extension json>
-    Module          xm_json
+Module xm_json
 </Extension>
-
-<Extension _fileop>
-    Module      xm_fileop
-    # Check the size of our log file hourly, rotate if larger than 5MB
-<Schedule>
-        Every   1 hour
-        Exec    if (file_exists('%LOGFILE%') and \
-                   (file_size('%LOGFILE%') >= 5M)) \
-                    file_cycle('%LOGFILE%', 8);
-</Schedule>
-    # Rotate our log file every week on Sunday at midnight
-<Schedule>
-        When    @weekly
-        Exec    if file_exists('%LOGFILE%') file_cycle('%LOGFILE%', 8);
-</Schedule>
+#DateFormat YYYY-MM-DDThh:mm:ss.sUTC - Not available in Community version
+#GenerateDateInUTC TRUE
+<Extension syslog>
+Module xm_syslog
 </Extension>
-# Snare compatible example configuration
-# Collecting event log
 <Input in>
-     Module      im_msvistalog
-  ReadFromLast     True
-  Query            <QueryList>\
-<Query Id="0">\
-<Select Path="Application">*</Select>\
-<Select Path="System">*</Select>\
-<Select Path="Security">*</Select>\
-<Select Path="Windows PowerShell">*</Select>\
-</Query>\
+Module im_msvistalog
+ReadFromLast True
+<QueryXML>
+<QueryList>
+<Query Id="0">
+<Select Path="Application">*</Select>
+<Select Path="System">*</Select>
+<Select Path="Security">*</Select>
+<Select Path="Windows PowerShell">*</Select>
+<Select Path="Microsoft-Windows-Sysmon/Operational">*</Select>
+</Query>
 </QueryList>
+</QueryXML>
+Exec $UnixTime = integer($EventTime)/1000;
 </Input>
 <Output devo_relay>
-    Module      om_tcp
-    Host        <Relay Ip>
-    Port        13000
-    Exec        $Message = to_json(); $SourceName="box.win_nxlog."+lc($Channel); delete($ProcessID); to_syslog_bsd();
+Module om_tcp
+Host <RelayIP>
+Port 13000
+Exec        $Message = to_json(); \
+                if ($Channel == "Microsoft-Windows-Sysmon/Operational") \
+                  $SourceName = "box.win_nxlog.sysmon"; \
+                else \
+                  $SourceName = "box.win_nxlog." + lc($Channel); \
+                   delete($ProcessID); to_syslog_bsd();
+#Exec
+</Output>
+<Output file>
+Module om_file
+File 'C:\nxlog_events.log'
+Exec $Message = to_json(); $SourceName="box.win_nxlog."+lc($Channel); delete($ProcessID); to_syslog_bsd();
 </Output>
 <Route 1>
-    Path        in => devo_relay
+Path in => devo_relay
+#Path in => file
 </Route>
