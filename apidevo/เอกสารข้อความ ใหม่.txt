@@ -1,0 +1,2 @@
+curl --location 'https://api-apac.devo.com/alerts/v1/alertDefinitions?page=0&size=2' \
+--header 'standAloneToken: xxxxxxx'
