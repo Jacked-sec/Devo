@@ -1,4 +1,4 @@
-# 🚀 Fluent Bit Deployment Guide (AWS EKS + Helm + External ConfigMap)
+# Fluent Bit Deployment Guide (AWS EKS + Helm + External ConfigMap)
 
 ## 📌 Architecture Overview
 
@@ -31,14 +31,77 @@ kubectl get ns
 ------------------------------------------------------------------------
 
 # 3️⃣ Apply Fluent Bit ConfigMap
+``` bash
+nano fluent-bit-config.yaml
+```
+Insert
+``` bash
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit
+  namespace: logging
+data:
 
-Ensure you already created:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush        5
+        Log_Level    info
+        Daemon       Off
+        Parsers_File parsers.conf
+        storage.path /var/log/flb-storage
+        storage.sync normal
+        storage.checksum off
+        storage.backlog.mem_limit 50M
 
--   `fluent-bit-config.yaml`
--   Configured with:
-    -   Port `13011`
-    -   Port `13012` (if required)
+    [INPUT]
+        Name              tail
+        Path              /var/log/containers/*.log
+        Tag               kube.*
+        Parser            cri
+        Refresh_Interval  10
+        Skip_Long_Lines   On
+        Mem_Buf_Limit     50MB
+        storage.type      filesystem
 
+    #  Kubernetes metadata
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Keep_Log            On
+        K8S-Logging.Parser  On
+        K8S-Logging.Exclude On
+
+    #Exclude log fluent-bit 
+    [FILTER]
+        Name    grep
+        Match   kube.*
+        Exclude kubernetes.container_name fluent-bit
+
+    # rename log message  syslog output
+    [FILTER]
+        Name    modify
+        Match   kube.*
+        Rename  log message
+
+    [OUTPUT]
+        Name            syslog
+        Match           kube.*
+        Host            <relayIP>
+        Port            13011
+        Mode            tcp
+        Syslog_Format   rfc5424
+        Syslog_Message_Key message
+        Retry_Limit     False
+
+  parsers.conf: |
+    [PARSER]
+        Name        cri
+        Format      regex
+        Regex       ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<log>.*)$
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L%z
+```
 Apply configuration:
 
 ``` bash
@@ -139,19 +202,13 @@ nc -vz <relayIP> 13011
 ``` bash
 kubectl describe pod -n logging <pod-name>
 ```
+## log Fluent Bit
+``` bash
+kubectl logs -n logging -l app.kubernetes.io/name=fluent-bit
+```
 
-------------------------------------------------------------------------
 
-# 📁 Recommended Repository Structure
-
-    .
-    ├── fluent-bit-config.yaml
-    ├── values.yaml
-    └── FluentBit_EKS_Deployment_Guide.md
-
-------------------------------------------------------------------------
-
-# 🎯 Full Deployment Command Summary
+# Full Deployment Command Summary
 
 ``` bash
 kubectl create namespace logging
@@ -160,28 +217,4 @@ helm repo add fluent https://fluent.github.io/helm-charts
 helm repo update
 helm install fluent-bit fluent/fluent-bit -n logging -f values.yaml
 ```
-
-------------------------------------------------------------------------
-
-# ✅ Production Best Practices
-
--   Enable filesystem buffering
--   Set Mem_Buf_Limit
--   Use Retry_Limit False
--   Define CPU & memory limits in DaemonSet
--   Open Security Group ports 13011 / 13012
--   Monitor EPS and resource usage
-
-------------------------------------------------------------------------
-
-# 🔐 Optional Enhancements
-
--   TLS syslog
--   High Availability relay
--   Multi-port routing (C1 / C2 split)
--   EPS tuning for 10k+ logs/sec
--   Centralized log monitoring dashboard
-
-------------------------------------------------------------------------
-
-© Deployment Guide - Fluent Bit on AWS EKS
+Jacked
