@@ -1,0 +1,26 @@
+{
+  "global_overrides": {
+    "debug": false
+  },
+  "inputs": {
+    "crowdstrike": {
+      "credentials": {
+        "client_id": "xxxxxxxxxxxxxxxxxxxx",
+        "secret_key": "xxxxxxxxxxxxxxxxxx"
+      },
+      "enabled": true,
+      "id": "inhouse_gable_crowdstrike_api_resources_if",
+      "override_base_url": "https://api.us-2.crowdstrike.com",
+      "requests_per_second": 5,
+      "services": {
+        "estream": {
+          "initial_partition_offsets": {
+            "0": 13428
+          },
+          "reset_persistence_auth": "2022-10-20T16:14:00.000Z",
+          "tagging_version": "1.3.0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+1.สร้าง Namespace
+kubectl create namespace logging
+
+2.Apply ConfigMap
+kubectl apply -f fluent-bit-config.yaml
+
+วางไฟล์ fluent-bit-yaml port 13011 , fluent-bit-yaml port 13012
+
+3.Add Helm Repo
+helm repo add fluent https://fluent.github.io/helm-charts
+helm repo update
+
+4.สร้าง values.yaml สำหรับบอก Helm ให้ใช้ ConfigMap
+
+nano values.yaml
+วางไฟล์ values.yaml
+
+5.helm install fluent-bit fluent/fluent-bit \
+  --namespace logging \
+  -f values.yaml
+6.ตรวจสอบว่า Pod ขึ้นครบทุก Node
+kubectl get pods -n logging -o wide
+
+7. ดู log Fluent Bit
+kubectl logs -n logging -l app.kubernetes.io/name=fluent-bit
+
+ถ้าจะแก้ config
+แก้ไฟล์ fluent-bit-config.yaml
+แล้ว apply ใหม่
+
+kubectl apply -f fluent-bit-config.yaml
+kubectl rollout restart daemonset fluent-bit -n logging
+
+ติดตั้ง Helm หากยังไม่มี
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+helm version

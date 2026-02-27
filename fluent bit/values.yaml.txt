@@ -1,0 +1,18 @@
+kind: DaemonSet
+
+existingConfigMap: fluent-bit
+
+serviceAccount:
+  create: true
+
+rbac:
+  create: true
+
+daemonSetVolumes:
+  - name: varlog
+    hostPath:
+      path: /var/log
+
+daemonSetVolumeMounts:
+  - name: varlog
+    mountPath: /var/log

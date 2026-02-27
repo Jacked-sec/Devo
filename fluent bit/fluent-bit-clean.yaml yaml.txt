@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit
+  namespace: logging
+data:
+
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush        5
+        Log_Level    info
+        Daemon       Off
+        Parsers_File parsers.conf
+
+    [INPUT]
+        Name              tail
+        Path              /var/log/containers/*.log
+        Tag               kube.*
+        Parser            cri
+        Refresh_Interval  5
+        Skip_Long_Lines   On
+
+    # --- Kubernetes metadata
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Keep_Log            On
+        K8S-Logging.Parser  On
+        K8S-Logging.Exclude On
+
+    #  fluent-bit pod 
+    [FILTER]
+        Name    grep
+        Match   kube.*
+        Exclude kubernetes.container_name fluent-bit
+
+    # out internal log  fluent-bit
+    [FILTER]
+        Name    grep
+        Match   kube.*
+        Exclude message ^\[(input|engine|filter|output|service):
+
+    # out inode / watch_fd
+    [FILTER]
+        Name    grep
+        Match   kube.*
+        Exclude message ^inode=
+
+    
+    [FILTER]
+        Name    modify
+        Match   kube.*
+        Rename  log message
+
+    [OUTPUT]
+        Name            syslog
+        Match           kube.*
+        Host            <relayIP>
+        Port            13011
+        Mode            tcp
+        Syslog_Format   rfc5424
+        Syslog_Message_Key message
+
+
+  parsers.conf: |
+    [PARSER]
+        Name        cri
+        Format      regex
+        Regex       ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<log>.*)$
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S.%LZ
