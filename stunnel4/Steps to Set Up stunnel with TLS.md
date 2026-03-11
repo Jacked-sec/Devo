@@ -99,7 +99,7 @@ sudo systemctl status stunnel4
 ```
 Check Port 
 ```bash
-sudo ss -lntp | grep 7520
+sudo ss -lntp | grep 6520
 ```
 
 
