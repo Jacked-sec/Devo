@@ -101,6 +101,14 @@ Check Port
 ```bash
 sudo ss -lntp | grep 6520
 ```
+# 4. Set Auto start
 
+```bash
+sudo systemctl enable stunnel4
+```
+Check Auto start
+```bash
+systemctl is-enabled stunnel4
+```
 
 Jacked
