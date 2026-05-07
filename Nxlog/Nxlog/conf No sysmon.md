@@ -58,7 +58,7 @@ SpoolDir  %ROOT%\data
 <Output devo_relay>
     Module      om_tcp
     Host        RelayIP
-    Port        13000
+    Port        13004
     Exec        $Message = to_json(); $SourceName="box.win_nxlog."+lc($Channel); delete($ProcessID); to_syslog_bsd();
 </Output>
 <Route 1>
