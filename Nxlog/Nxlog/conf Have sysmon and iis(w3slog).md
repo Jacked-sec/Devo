@@ -37,24 +37,18 @@ SpoolDir %ROOT%\data
 
 # --- Input: IIS Log (raw) ---
 <Input iis_access>
-    Module im_file
-    File "C:\\inetpub\\logs\\LogFiles\\W3SVC1\\*.log"
-    SavePos TRUE
-    ReadFromLast TRUE
-    InputType LineBased
-    Exec if $raw_event =~ /^#/ drop(); \
-         else { \
-            $EventTime = now(); \
-            $SourceName = "web.iis.accessW3c"; \
-            $Message = $raw_event; \
-         }
+    Module      im_file
+    File        'C:\inetpub\logs\LogFiles\W3SVC*\u_ex*.log'
+<Exec>
+        if $raw_event =~ /^#/ drop();
+</Exec>
 </Input>
 
-# --- Output: Devo TCP Relay ---
+# --- Output: Devo TCP Relay Output win_eventlog ---
 <Output devo_relay>
     Module om_tcp
-    Host <Relay IP>
-    Port 13004
+    Host <relayip>
+    Port 13005
     Exec \
         if defined($Channel) and $Channel == "Microsoft-Windows-Sysmon/Operational" { \
             $SourceName = "box.win_nxlog.sysmon"; \
@@ -65,6 +59,13 @@ SpoolDir %ROOT%\data
         $Message = to_json(); \
         delete($ProcessID); \
         to_syslog_bsd();
+</Output>
+
+<Output devo_relay_iis>
+    Module om_tcp
+    Host <relayip>
+    Port 13006
+    Exec to_syslog_bsd();  # Or to_syslog_snare() if Devo requires
 </Output>
 
 # --- Output (debug file) ---
@@ -80,6 +81,6 @@ SpoolDir %ROOT%\data
 </Route>
 
 <Route route_iis>
-    Path iis_access => devo_relay
+    Path iis_access => devo_relay_iis
 </Route>
 ```
