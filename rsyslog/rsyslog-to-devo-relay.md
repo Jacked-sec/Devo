@@ -218,7 +218,7 @@ Replace these values:
 | Placeholder | Description | Example |
 |---|---|---|
 | `<DEVO_RELAY_IP>` | Devo Relay IP address | `10.10.10.10` |
-| `<DEVO_RELAY_PORT>` | Devo Relay listening port | `13010` |
+| `<DEVO_RELAY_PORT>` | Devo Relay listening port | `13011` |
 
 Example with actual values:
 
@@ -352,7 +352,7 @@ sudo tcpdump -i any host <LINUX_SERVER_IP> and port <DEVO_RELAY_PORT>
 Example:
 
 ```bash
-sudo tcpdump -i any host 10.10.20.15 and port 13010
+sudo tcpdump -i any host 10.10.20.15 and port 13011
 ```
 
 If packets are visible, the Linux server is sending logs to the Devo Relay.
