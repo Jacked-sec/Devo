@@ -83,7 +83,7 @@ SpoolDir  %ROOT%\data
 <Output devo_relaymessageTracking>
     Module om_tcp
     Host RelayIP
-    Port 13006
+    Port 13031
     Exec to_syslog_bsd();  # Or to_syslog_snare() if Devo requires
 </Output>
 

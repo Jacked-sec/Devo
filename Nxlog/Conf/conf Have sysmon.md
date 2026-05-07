@@ -1,0 +1,56 @@
+```conf
+#define ROOT C:\Program Files\nxlog
+define ROOT C:\Program Files\nxlog
+define LOGDIR %ROOT%\data
+define LOGFILE %LOGDIR%\nxlog.log
+LogFile %LOGFILE%
+Moduledir %ROOT%\modules
+CacheDir %ROOT%\data
+Pidfile %ROOT%\data\nxlog.pid
+SpoolDir %ROOT%\data
+<Extension json>
+Module xm_json
+</Extension>
+#DateFormat YYYY-MM-DDThh:mm:ss.sUTC - Not available in Community version
+#GenerateDateInUTC TRUE
+<Extension syslog>
+Module xm_syslog
+</Extension>
+<Input in>
+Module im_msvistalog
+ReadFromLast True
+<QueryXML>
+<QueryList>
+<Query Id="0">
+<Select Path="Application">*</Select>
+<Select Path="System">*</Select>
+<Select Path="Security">*</Select>
+<Select Path="Windows PowerShell">*</Select>
+<Select Path="Microsoft-Windows-Sysmon/Operational">*</Select>
+</Query>
+</QueryList>
+</QueryXML>
+Exec $UnixTime = integer($EventTime)/1000;
+</Input>
+<Output devo_relay>
+Module om_tcp
+Host <RelayIP>
+Port 13004
+Exec        $Message = to_json(); \
+                if ($Channel == "Microsoft-Windows-Sysmon/Operational") \
+                  $SourceName = "box.win_nxlog.sysmon"; \
+                else \
+                  $SourceName = "box.win_nxlog." + lc($Channel); \
+                   delete($ProcessID); to_syslog_bsd();
+#Exec
+</Output>
+<Output file>
+Module om_file
+File 'C:\nxlog_events.log'
+Exec $Message = to_json(); $SourceName="box.win_nxlog."+lc($Channel); delete($ProcessID); to_syslog_bsd();
+</Output>
+<Route 1>
+Path in => devo_relay
+#Path in => file
+</Route>
+```
