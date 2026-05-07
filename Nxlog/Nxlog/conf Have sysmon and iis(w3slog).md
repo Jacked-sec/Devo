@@ -64,7 +64,7 @@ SpoolDir %ROOT%\data
 <Output devo_relay_iis>
     Module om_tcp
     Host <relayip>
-    Port 13006
+    Port 13004
     Exec to_syslog_bsd();  # Or to_syslog_snare() if Devo requires
 </Output>
 
