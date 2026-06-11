@@ -155,7 +155,17 @@ global(
     workDirectory="/var/spool/rsyslog"
 )
 ```
+or if error imuxsock and imfile
+```bash
+module(
+    load="immark"
+    interval="60"
+)
 
+global(
+    workDirectory="/var/spool/rsyslog"
+)
+```
 ---
 
 ## 5. Prepare rsyslog Work Directory
