@@ -90,7 +90,7 @@ It is recommended to keep `/etc/rsyslog.conf` simple and use only the include di
 File:
 
 ```text
-/etc/rsyslog.conf
+sudo cat /etc/rsyslog.conf
 ```
 
 Recommended content:
